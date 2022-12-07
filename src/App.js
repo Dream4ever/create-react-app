@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
 import logo from './logo.svg'
 
@@ -61,6 +61,11 @@ const KanbanCard = ({ title, status }) => {
 }
 const KanbanNewCard = ({ onSubmit }) => {
   const [title, setTitle] = useState('')
+  const inputElem = useRef(null)
+
+  useEffect(() => {
+    inputElem.current.focus()
+  }, [])
 
   const handleChange = (evt) => {
     setTitle(evt.target.value)
@@ -79,6 +84,7 @@ const KanbanNewCard = ({ onSubmit }) => {
         <input
           type="text"
           value={title}
+          ref={inputElem}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
         />
