@@ -12,8 +12,33 @@ const KanbanBoard = ({ children }) => {
 
 const KanbanBoardColumn = ({ children, className, title }) => {
   const fullClassNames = `kanban-column ${className}`
+
+  const handleDragOver = (evt) => {
+    evt.preventDefault()
+    evt.dataTransfer.dropEffect = 'move'
+  }
+
+  const handleDragLeave = (evt) => {
+    evt.preventDefault()
+    evt.dataTransfer.dropEffect = 'none'
+  }
+
+  const handleDrop = (evt) => {
+    evt.preventDefault()
+  }
+
+  const handleDragEnd = (evt) => {
+    evt.preventDefault()
+  }
+
   return (
-    <section className={fullClassNames}>
+    <section
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      onDragEnd={handleDragEnd}
+      className={fullClassNames}
+    >
       <h2>{title}</h2>
       <ul>{children}</ul>
     </section>
@@ -25,7 +50,7 @@ const HOUR = 60 * MINUTE
 const DAY = 24 * HOUR
 const UPDATE_INTERVAL = MINUTE
 
-const KanbanCard = ({ title, status }) => {
+const KanbanCard = ({ title, status, onDragStart }) => {
   const [displayTime, setDisplayTime] = useState(status)
 
   useEffect(() => {
@@ -52,8 +77,18 @@ const KanbanCard = ({ title, status }) => {
     }
   }, [status])
 
+  const handleDragStart = (evt) => {
+    evt.dataTransfer.effectAllowed = 'move'
+    evt.dataTransfer.setData('text/plain', title)
+    onDragStart && onDragStart(evt)
+  }
+
   return (
-    <li className="kanban-card">
+    <li
+      className="kanban-card"
+      draggable="true"
+      onDragStart={handleDragStart}
+    >
       <div className="card-title">{title}</div>
       <div className="card-status" title={status}>{displayTime}</div>
     </li>
@@ -93,6 +128,10 @@ const KanbanNewCard = ({ onSubmit }) => {
   )
 }
 
+const COLUMN_KEY_TODO = 'todo'
+const COLUMN_KEY_ONGOING = 'ongoing'
+const COLUMN_KEY_DONE = 'done'
+
 function App() {
   const [showAdd, setShowAdd] = useState(false)
   const [todoList, setTodoList] = useState([
@@ -110,6 +149,10 @@ function App() {
     { title: '开发任务-2', status: '2022-05-22 18:15' },
     { title: '测试任务-1', status: '2022-05-22 18:15' },
   ])
+
+  const [draggedItem, setDraggedItem] = useState(null)
+  const [dragSource, setDragSource] = useState(null)
+  const [dragTarget, setDragTarget] = useState(null)
 
   const handleAdd = (evt) => {
     setShowAdd(true)
@@ -144,7 +187,11 @@ function App() {
             </>
           }>
           {showAdd && <KanbanNewCard onSubmit={handleSubmit} />}
-          {todoList.map(props => <KanbanCard {...props} key={props.title} />)}
+          {todoList.map(props => <KanbanCard
+            {...props}
+            key={props.title}
+            onDragStart={setDraggedItem}
+          />)}
         </KanbanBoardColumn>
         <KanbanBoardColumn className={'column-ongoing'} title='进行中'>
           {ongoingList.map(props => <KanbanCard {...props} key={props.title} />)}
