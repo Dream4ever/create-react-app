@@ -10,29 +10,43 @@ const KanbanBoard = ({ children }) => {
   )
 }
 
-const KanbanBoardColumn = ({ children, className, title }) => {
+const KanbanBoardColumn = ({
+  children,
+  className,
+  title,
+  setIsDragSource = () => { },
+  setIsDragTarget = () => { },
+  onDrop,
+}) => {
+
   const fullClassNames = `kanban-column ${className}`
 
   const handleDragOver = (evt) => {
     evt.preventDefault()
     evt.dataTransfer.dropEffect = 'move'
+    setIsDragTarget(true)
   }
 
   const handleDragLeave = (evt) => {
     evt.preventDefault()
     evt.dataTransfer.dropEffect = 'none'
+    setIsDragTarget(false)
   }
 
   const handleDrop = (evt) => {
     evt.preventDefault()
+    onDrop && onDrop()
   }
 
   const handleDragEnd = (evt) => {
     evt.preventDefault()
+    setIsDragSource(false)
+    setIsDragTarget(false)
   }
 
   return (
     <section
+      onDragStart={() => setIsDragSource(true)}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -86,7 +100,7 @@ const KanbanCard = ({ title, status, onDragStart }) => {
   return (
     <li
       className="kanban-card"
-      draggable="true"
+      draggable
       onDragStart={handleDragStart}
     >
       <div className="card-title">{title}</div>
@@ -94,6 +108,7 @@ const KanbanCard = ({ title, status, onDragStart }) => {
     </li>
   )
 }
+
 const KanbanNewCard = ({ onSubmit }) => {
   const [title, setTitle] = useState('')
   const inputElem = useRef(null)
@@ -169,6 +184,26 @@ function App() {
     setShowAdd(false)
   }
 
+  const handleDrop = (evt) => {
+    if (!draggedItem || !dragSource || !dragTarget || dragSource === dragTarget) {
+      return
+    }
+
+    const updaters = {
+      [COLUMN_KEY_TODO]: setTodoList,
+      [COLUMN_KEY_ONGOING]: setOngoingList,
+      [COLUMN_KEY_DONE]: setDoneList,
+    }
+
+    if (dragSource) {
+      updaters[dragSource]((currentStat) => currentStat.filter((item) => !Object.is(item, draggedItem)))
+    }
+
+    if (dragTarget) {
+      updaters[dragTarget]((currentStat) => [draggedItem, ...currentStat])
+    }
+  }
+
   return (
     <div className="App">
       <header className="App-header">
@@ -176,7 +211,8 @@ function App() {
         <img src={logo} className="App-logo" alt="logo" />
       </header>
       <KanbanBoard>
-        <KanbanBoardColumn className={'column-todo'}
+        <KanbanBoardColumn
+          className={'column-todo'}
           title={
             <>
               待处理
@@ -185,19 +221,49 @@ function App() {
                 disabled={showAdd}
               >&#8853; 添加新卡片</button>
             </>
-          }>
+          }
+          setIsDragSource={(isSrc) => setDragSource(isSrc ? COLUMN_KEY_TODO : null)}
+          setIsDragTarget={(isTgt) => setDragTarget(isTgt ? COLUMN_KEY_TODO : null)}
+          onDrop={handleDrop}
+        >
           {showAdd && <KanbanNewCard onSubmit={handleSubmit} />}
-          {todoList.map(props => <KanbanCard
-            {...props}
-            key={props.title}
-            onDragStart={setDraggedItem}
-          />)}
+          {todoList.map(props =>
+            <KanbanCard
+              {...props}
+              key={props.title}
+              onDragStart={() => setDraggedItem(props)}
+            />
+          )}
         </KanbanBoardColumn>
-        <KanbanBoardColumn className={'column-ongoing'} title='进行中'>
-          {ongoingList.map(props => <KanbanCard {...props} key={props.title} />)}
+        <KanbanBoardColumn
+          className={'column-ongoing'}
+          title='进行中'
+          setIsDragSource={(isSrc) => setDragSource(isSrc ? COLUMN_KEY_ONGOING : null)}
+          setIsDragTarget={(isTgt) => setDragTarget(isTgt ? COLUMN_KEY_ONGOING : null)}
+          onDrop={handleDrop}
+        >
+          {ongoingList.map(props =>
+            <KanbanCard
+              {...props}
+              key={props.title}
+              onDragStart={() => setDraggedItem(props)}
+            />
+          )}
         </KanbanBoardColumn>
-        <KanbanBoardColumn className={'column-done'} title='已完成'>
-          {doneList.map(props => <KanbanCard {...props} key={props.title} />)}
+        <KanbanBoardColumn
+          className={'column-done'}
+          title='已完成'
+          setIsDragSource={(isSrc) => setDragSource(isSrc ? COLUMN_KEY_DONE : null)}
+          setIsDragTarget={(isTgt) => setDragTarget(isTgt ? COLUMN_KEY_DONE : null)}
+          onDrop={handleDrop}
+        >
+          {doneList.map(props =>
+            <KanbanCard
+              {...props}
+              key={props.title}
+              onDragStart={() => setDraggedItem(props)}
+            />
+          )}
         </KanbanBoardColumn>
       </KanbanBoard>
     </div>
