@@ -2,7 +2,12 @@ import React from 'react';
 import './index.css';
 
 export default function KanbanBoardColumn({
-  children, className, title, setIsDragSource = () => { }, setIsDragTarget = () => { }, onDrop,
+  children,
+  className,
+  title,
+  setIsDragSource = () => { },
+  setIsDragTarget = () => { },
+  onDrop,
 }) {
 
   const fullClassNames = `kanban-column ${className}`;
