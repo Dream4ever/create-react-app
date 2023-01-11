@@ -1,10 +1,15 @@
 import React from 'react';
+
+import KanbanCard from '../KanbanCard';
+
 import './index.css';
 
 export default function KanbanBoardColumn({
   children,
   className,
   title,
+  cardList = [],
+  setDraggedItem,
   setIsDragSource = () => { },
   setIsDragTarget = () => { },
   onDrop,
@@ -45,7 +50,17 @@ export default function KanbanBoardColumn({
       className={fullClassNames}
     >
       <h2>{title}</h2>
-      <ul>{children}</ul>
+      <ul>
+        {children}
+        {cardList.map(props =>
+          <KanbanCard
+            {...props}
+            key={props.title}
+            onDragStart={() => setDraggedItem && setDraggedItem(props)}
+          />
+        )}
+      </ul>
+
     </section>
   );
 }
