@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react'
 
 import KanbanCard from '../KanbanCard';
+import KanbanNewCard from "../KanbanNewCard";
 
 import './index.css';
 
@@ -9,11 +10,14 @@ export default function KanbanBoardColumn({
   className,
   title,
   cardList = [],
+  canAddNew = false,
+  onAdd,
   setDraggedItem,
   setIsDragSource = () => { },
   setIsDragTarget = () => { },
   onDrop,
 }) {
+  const [showAdd, setShowAdd] = useState(false)
 
   const fullClassNames = `kanban-column ${className}`;
 
@@ -40,6 +44,15 @@ export default function KanbanBoardColumn({
     setIsDragTarget(false);
   };
 
+  const handleAdd = () => {
+    setShowAdd(true)
+  }
+
+  const onAddNewCard = (title) => {
+    setShowAdd(false)
+    onAdd && onAdd(title)
+  }
+
   return (
     <section
       onDragStart={() => setIsDragSource(true)}
@@ -49,8 +62,15 @@ export default function KanbanBoardColumn({
       onDragEnd={handleDragEnd}
       className={fullClassNames}
     >
-      <h2>{title}</h2>
+      <h2>
+        {title}
+        {canAddNew && <button
+          onClick={handleAdd}
+          disabled={showAdd}
+        >&#8853; 添加新卡片</button>}
+      </h2>
       <ul>
+        {(canAddNew && showAdd) && <KanbanNewCard onSubmit={onAddNewCard} />}
         {children}
         {cardList.map(props =>
           <KanbanCard
