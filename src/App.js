@@ -31,12 +31,9 @@ function App() {
   const [dragSource, setDragSource] = useState(null)
   const [dragTarget, setDragTarget] = useState(null)
 
-  const handleAdd = (title) => {
+  const handleAdd = (newCard) => {
     setTodoList([
-      {
-        title,
-        status: new Date().toDateString(),
-      },
+      newCard,
       ...todoList,
     ])
   }

@@ -48,9 +48,9 @@ export default function KanbanBoardColumn({
     setShowAdd(true)
   }
 
-  const onAddNewCard = (title) => {
+  const handleSubmit = (newCard) => {
     setShowAdd(false)
-    onAdd && onAdd(title)
+    onAdd && onAdd(newCard)
   }
 
   return (
@@ -70,7 +70,7 @@ export default function KanbanBoardColumn({
         >&#8853; 添加新卡片</button>}
       </h2>
       <ul>
-        {(canAddNew && showAdd) && <KanbanNewCard onSubmit={onAddNewCard} />}
+        {(canAddNew && showAdd) && <KanbanNewCard onSubmit={handleSubmit} />}
         {children}
         {cardList.map(props =>
           <KanbanCard
