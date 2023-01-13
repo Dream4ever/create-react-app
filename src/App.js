@@ -31,7 +31,7 @@ function App() {
   const [dragSource, setDragSource] = useState(null)
   const [dragTarget, setDragTarget] = useState(null)
 
-  const handleSubmit = (title) => {
+  const handleAdd = (title) => {
     setTodoList([
       {
         title,
@@ -74,7 +74,7 @@ function App() {
           canAddNew
           cardList={todoList}
           setDraggedItem={setDraggedItem}
-          onAdd={handleSubmit}
+          onAdd={handleAdd}
           setIsDragSource={(isSrc) => setDragSource(isSrc ? COLUMN_KEY_TODO : null)}
           setIsDragTarget={(isTgt) => setDragTarget(isTgt ? COLUMN_KEY_TODO : null)}
           onDrop={handleDrop}
